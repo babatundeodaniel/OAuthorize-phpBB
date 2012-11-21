@@ -1,0 +1,14 @@
+.oauthorize_button {
+
+background: #3B5998 url('./images/fb_icon.png') left 7px no-repeat;
+font: normal 12px Tahoma, 'Showcard Gothic', Verdana;
+padding: 4px 8px 4px 16px;
+border-radius: 8px;
+color: white !important;    
+    
+}
+
+#oauthorize_phpbb_button {
+position: relative;
+top: 3px;
+}

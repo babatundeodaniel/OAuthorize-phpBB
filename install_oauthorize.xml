@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml-stylesheet type="text/xsl" href="modx.prosilver.en.xsl"?>
+<!--NOTICE: Please open this file in your web browser. If presented with a security warning, you may safely tell it to allow the blocked content.-->
+<!--For security purposes, please check: http://www.phpbb.com/mods/ for the latest version of this MOD.\nAlthough MODs are checked before being allowed in the MODs Database there is no guarantee that there are no security problems within the MOD.\nNo support will be given for MODs not found within the MODs Database which can be found at http://www.phpbb.com/mods/-->
+<mod xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.phpbb.com/mods/xml/modx-1.2.5.xsd">
+	<header>
+		<meta name="generator" content="MODX file generated with PP MODX Creator by tumba25 (online version)"/>
+		<license><![CDATA[http://opensource.org/licenses/gpl-license.php GNU General Public License v2]]></license>
+		<title lang="en"><![CDATA[OAuthorize phpBB mod by pu]]></title>
+		<description lang="en"><![CDATA[OAuthorize phpBB mod by pu allows your forum to use OAuth for Login and Registration]]></description>
+		<author-notes lang="en"><![CDATA[If you like this mod, let me know. You can donate through PayPal: pao.umali@gmail.com. 
+		
+		Also, visit this mod's page here: 
+		https://www.facebook.com/pages/OAuthorize-phpBB/427850493937416]]></author-notes>
+		<author-group>
+			<author>
+				<realname><![CDATA[Paolo Umali]]></realname>
+				<username><![CDATA[paoloumali]]></username>
+				<homepage><![CDATA[https://www.facebook.com/pages/OAuthorize-phpBB/427850493937416]]></homepage>
+				<email><![CDATA[dev+phpbb@paoloumali.com]]></email>
+			</author>
+		</author-group>
+		<mod-version>0.1.0</mod-version>
+		<installation>
+			<level>easy</level>
+			<time>120</time>
+			<target-version>3.0.11</target-version>
+		</installation>
+	</header>
+	<action-group>
+		<sql><![CDATA[ALTER TABLE `phpbb_sessions` ADD `session_oauth` VARCHAR(255) NOT NULL DEFAULT '';
+INSERT INTO `phpbb_config` (`config_name`, `config_value`) VALUES ('oauthorize_facebook_app_id', '344617158898614');
+INSERT INTO `phpbb_config` (`config_name`, `config_value`) VALUES ('oauthorize_facebook_app_secret', '6dc8ac871858b34798bc2488200e503d');
+INSERT INTO `phpbb_config` (`config_name`, `config_value`) VALUES ('oauthorize_facebook_app_scope', 'email');]]></sql>
+		<copy>
+			<file from="root/oauthorize.php" to="oauthorize.php"/>
+			<file from="root/oauthorize/index.htm" to="oauthorize/index.htm"/>
+			<file from="root/oauthorize/facebook/index.htm" to="oauthorize/facebook/index.htm"/>
+			<file from="root/oauthorize/facebook/src/index.htm" to="oauthorize/facebook/src/index.htm"/>
+			<file from="root/oauthorize/facebook/src/base_facebook.php" to="oauthorize/facebook/src/base_facebook.php"/>
+			<file from="root/oauthorize/facebook/src/facebook.php" to="oauthorize/facebook/src/facebook.php"/>
+			<file from="root/oauthorize/facebook/src/fb_ca_chain_bundle.crt" to="oauthorize/facebook/src/fb_ca_chain_bundle.crt"/>
+			<file from="root/styles/prosilver/template/oauthorize_phpbb_links.html" to="styles/prosilver/template/oauthorize_phpbb_links.html"/>
+			<file from="root/styles/prosilver/theme/oauthorize.css" to="styles/prosilver/theme/oauthorize.css"/>
+			<file from="root/styles/prosilver/theme/images/fb_icon.png" to="styles/prosilver/theme/images/fb_icon.png"/>
+			<file from="root/includes/auth/auth_oauth.php" to="includes/auth/auth_oauth.php"/>
+		</copy>
+		
+		<open src="includes/functions.php">
+			<edit>
+				<find><![CDATA[	// Last visit date/time
+	$s_last_visit = ($user->data['user_id'] != ANONYMOUS) ? $user->format_date($user->data['session_last_visit']) : '';]]></find>
+				<action type="before-add"><![CDATA[
+	//PU phpBB OAuth start
+	if ($user->data['user_id'] != ANONYMOUS)
+	{	
+		if ($user->data['session_oauth'] != '') // oauthed
+		{
+			$u_oauth_facebook_connect = append_sid("{$phpbb_root_path}oauthorize.$phpEx", 'provider=facebook&action=deauthorize', true, $user->session_id);
+			$l_oauth_facebook_connect = 'Deauthorize Facebook';
+		
+		} else {
+
+			$u_oauth_facebook_connect = append_sid("{$phpbb_root_path}oauthorize.$phpEx", 'provider=facebook&action=authorize', true, $user->session_id);
+			$l_oauth_facebook_connect = 'Authorize Facebook';
+
+		}
+	}
+	else
+	{
+		$u_oauth_facebook_connect = append_sid("{$phpbb_root_path}oauthorize.$phpEx", 'provider=facebook');
+		$l_oauth_facebook_connect = 'Facebook Connect';
+	}
+	//PU phpBB OAuth end
+				]]></action>
+			</edit>
+			
+			
+			<edit>
+				<find><![CDATA[		'SITENAME'						=> $config['sitename'],]]></find>
+				<action type="before-add"><![CDATA[
+	//PU phpBB OAuth start
+		'L_OAUTH_FACEBOOK_CONNECT'	=> $l_oauth_facebook_connect,
+		'U_OAUTH_FACEBOOK_CONNECT'	=> $u_oauth_facebook_connect,
+	//PU phpBB OAuth end
+				]]></action>
+			</edit>			
+			
+			
+		</open>		
+		
+		<open src="includes/ucp/ucp_register.php">
+			<edit>
+				<find><![CDATA[		global $config, $db, $user, $auth, $template, $phpbb_root_path, $phpEx;]]></find>
+				<action type="after-add"><![CDATA[//PU phpBB OAuth start
+ 
+		$reg_type = request_var('type', '');
+		$add_reg_type ='';
+
+		if ($reg_type == 'oauth')
+		{
+  			$session_oauth = unserialize($user->data['session_oauth']);
+
+			$add_reg_type = '&type='.$reg_type.'&provider='.$session_oauth['provider'];
+
+			$template->assign_vars(array(
+
+				'L_OAUTH_PROVIDER'          => $session_oauth['provider'],				
+				'L_OAUTH_ID'                => $session_oauth['id'],				
+				'L_OAUTH_USERNAME'          => $session_oauth['username'],
+				'L_OAUTH_EMAIL'             => $session_oauth['email'],
+				'L_OAUTH_ID_FORM_INPUT_KEY' => 'pf_oauth_'.$session_oauth['provider'].'_id',
+
+			));			
+		}
+
+//PU phpBB OAuth end
+]]></action>
+			</edit>
+			<edit>
+				<find><![CDATA[					'U_COPPA_NO'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register&amp;coppa=0' . $add_lang),]]></find>
+				<inline-edit>
+					<inline-find><![CDATA[					'U_COPPA_NO'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register&amp;coppa=0']]></inline-find>
+					<inline-action type="after-add"><![CDATA[ . $add_reg_type]]></inline-action>
+				</inline-edit>
+			</edit>
+			<edit>
+				<find><![CDATA[					'U_COPPA_YES'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register&amp;coppa=1' . $add_lang),]]></find>
+				<inline-edit>
+					<inline-find><![CDATA[					'U_COPPA_YES'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register&amp;coppa=1']]></inline-find>
+					<inline-action type="after-add"><![CDATA[ . $add_reg_type]]></inline-action>
+				</inline-edit>
+			</edit>
+			<edit>
+				<find><![CDATA[					'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register' . $add_lang),]]></find>
+				<inline-edit>
+					<inline-find><![CDATA[					'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register']]></inline-find>
+					<inline-action type="after-add"><![CDATA[ . $add_reg_type]]></inline-action>
+				</inline-edit>
+			</edit>
+			<edit>
+				<find><![CDATA[					'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register' . $add_lang . $add_coppa),]]></find>
+				<inline-edit>
+					<inline-find><![CDATA[					'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register']]></inline-find>
+					<inline-action type="after-add"><![CDATA[ . $add_reg_type]]></inline-action>
+				</inline-edit>
+			</edit>
+			<edit>
+				<find><![CDATA[			'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register'),]]></find>
+				<inline-edit>
+					<inline-find><![CDATA[			'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register']]></inline-find>
+					<inline-action type="after-add"><![CDATA[ . $add_reg_type]]></inline-action>
+				</inline-edit>
+			</edit>
+		</open>
+		
+		
+		<open src="styles/prosilver/theme/stylesheet.css">
+			<edit>
+				<find><![CDATA[@import url("colours.css");]]></find>
+				<action type="after-add"><![CDATA[@import url("oauthorize.css");]]></action>
+			</edit>
+		</open>
+			
+		<open src="styles/prosilver/template/overall_header.html">
+			<edit>
+				<find><![CDATA[				<li class="icon-faq"><a href="{U_FAQ}" title="{L_FAQ_EXPLAIN}">{L_FAQ}</a></li>]]></find>
+				<action type="before-add"><![CDATA[<!-- INCLUDE oauthorize_phpbb_links.html -->]]></action>
+			</edit>
+		</open>
+		<open src="styles/prosilver/template/ucp_register.html">
+			<edit>
+				<find><![CDATA[<!-- INCLUDE overall_footer.html -->]]></find>
+				<action type="before-add"><![CDATA[<!-- //PU phpBB OAuth start -->
+<script type="text/javascript">
+document.getElementById('username').value="<!-- IF L_OAUTH_USERNAME -->{L_OAUTH_USERNAME}<!-- ENDIF -->";
+document.getElementById('email').value="<!-- IF L_OAUTH_EMAIL -->{L_OAUTH_EMAIL}<!-- ENDIF -->";
+document.getElementById('{L_OAUTH_ID_FORM_INPUT_KEY}').value="<!-- IF L_OAUTH_ID -->{L_OAUTH_ID}<!-- ENDIF -->";
+
+//hide
+var providers = ['facebook'];//put your active array of providers
+for (var i=0,len=providers.length; i<len; i++) { 
+	document.getElementById('pf_oauth_'+providers[i]+'_id').parentNode.parentNode.style.display = "none";
+}
+</script>
+<!-- //PU phpBB OAuth end -->
+				]]></action>
+			</edit>
+		</open>
+		<diy-instructions lang="en"><![CDATA[
+Very important: Please do not install if you haven't even read about how phpBB mods are.
+OAuth-based plugins are reliant on the url you use so you can't test this on a localhost. A Facebook app that ties with such a mod like this requires you to indicate on which url the Facebook app will communicate.
+
+1. Important: Run the sql that came with the instructions.
+2. We currently have Facebook support. So create a facebook app, you need the following: App ID and App secret.
+3. No ACP module at the moment, so after installation and running sql, just go to the forum/oauthorize.php file and look at the top portion where you can place these values.
+4. Create a Custom Profile Field. Follow cautiously.
+
+Edit profile field
+Field type: Single text field
+Field identification: oauth_facebook_id //follow this format
+Publicly display profile field: Yes
+Display on registration screen: Ticked (Necessary for the registration to work since the template uses javascript to automatically input the obtained Facebook ID. PS. The field is also styled display:none)
+Display on viewtopic screen: Ticked
+Field name/title presented to the user: Facebook ID
+Field description: This ID is being used for OAuth so that the forum can identify which tokens are valid.
+Set it to 0 as Default
+
+Profile type specific options
+Length of input box: 30
+Minimum number of characters: 0
+Maximum number of characters: 30
+Field validation: Only numbers
+
+Additional information you may like to know
+:
+Since we are using Custom profile fields to install Facebook IDs, you can easily use it in templates like viewtopic_body.html to present any info made publicly available through the Open Graph.
+
+e.g. Creating Facebook link in viewtopic_body
+
+Go again to oauth_facebook_id Custom Profile Field in ACP, make sure 'Hide Profile Field is unchecked'. This will make sure that regular users are not able to edit it in their UCP.
+
+Go to ACP > General > Load Settings, 
+
+Display custom profile fields in user profiles: NO (Some would set this to YES but when you do so, most likely you have to edit the template so that you can make better use of Facebook ID instead of just displaying mere numbers.)
+
+5. Purge cache
+
+Roadmap:
+1. Adding more OAuth providers as they are basically the same but with minor difference in implementations.
+2. ACP although better if someone else will contribute this.
+3. Take advantage of the fact that we're storing the provider IDs like Facebook ID as custom profile fields.
+
+If you need help, try the phpBB forum or go to the facebook page that is indicated in this file.
+
+Visit the Facebook Page: https://www.facebook.com/pages/OAuthorize-phpBB/427850493937416
+Github: 
+
+]]></diy-instructions>
+	</action-group>
+</mod>
