@@ -46,13 +46,11 @@ INSERT INTO `phpbb_config` (`config_name`, `config_value`) VALUES ('oauthorize_f
 			<file from="root/styles/prosilver/theme/images/fb_icon.png" to="styles/prosilver/theme/images/fb_icon.png"/>
 			<file from="root/includes/auth/auth_oauth.php" to="includes/auth/auth_oauth.php"/>
 		</copy>
-		
 		<open src="includes/functions.php">
 			<edit>
 				<find><![CDATA[	// Last visit date/time
 	$s_last_visit = ($user->data['user_id'] != ANONYMOUS) ? $user->format_date($user->data['session_last_visit']) : '';]]></find>
-				<action type="before-add"><![CDATA[
-	//PU phpBB OAuth start
+				<action type="before-add"><![CDATA[	//PU phpBB OAuth start
 	$pu_oauthorize_phpbb_enabled = true; //will be used in the future for enabling/disabling this mod
 
 	if ($user->data['user_id'] != ANONYMOUS)
@@ -77,26 +75,19 @@ INSERT INTO `phpbb_config` (`config_name`, `config_value`) VALUES ('oauthorize_f
 	//PU phpBB OAuth end
 				]]></action>
 			</edit>
-			
-			
 			<edit>
 				<find><![CDATA[		'SITENAME'						=> $config['sitename'],]]></find>
-				<action type="before-add"><![CDATA[
-	//PU phpBB OAuth start
+				<action type="before-add"><![CDATA[	//PU phpBB OAuth start
 		'L_OAUTH_FACEBOOK_CONNECT'	=> $l_oauth_facebook_connect,
 		'U_OAUTH_FACEBOOK_CONNECT'	=> $u_oauth_facebook_connect,
 	//PU phpBB OAuth end
 				]]></action>
-			</edit>			
-			
-			
-		</open>		
-		
+			</edit>
+		</open>
 		<open src="includes/ucp/ucp_register.php">
 			<edit>
 				<find><![CDATA[		global $config, $db, $user, $auth, $template, $phpbb_root_path, $phpEx;]]></find>
-				<action type="after-add"><![CDATA[
-//PU phpBB OAuth start
+				<action type="after-add"><![CDATA[//PU phpBB OAuth start
  
 		$reg_type = request_var('type', '');
 		$reg_provider = request_var('provider', '');
@@ -125,64 +116,40 @@ INSERT INTO `phpbb_config` (`config_name`, `config_value`) VALUES ('oauthorize_f
 			</edit>
 			<edit>
 				<find><![CDATA[				$message = $message . '<br /><br />' . sprintf($user->lang['RETURN_INDEX'], '<a href="' . append_sid("{$phpbb_root_path}index.$phpEx") . '">', '</a>');]]></find>
-				<action type="after-add"><![CDATA[
-//PU phpBB OAuth start
+				<action type="after-add"><![CDATA[//PU phpBB OAuth start
 			//autologin after sucessful registration assisted by oauth
 			if (isset($reg_type) && 'oauth' === $reg_type && isset($reg_provider)) 
 				meta_refresh( 3, $phpbb_root_path.'oauthorize.php?provider='.$reg_provider.'&action=login&after=registration');			
 //PU phpBB OAuth end
 ]]></action>
-			</edit>			
-			
-			
-		
-			
-			
-			<edit>
-				<find><![CDATA[					'U_COPPA_NO'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register&amp;coppa=0' . $add_lang),]]></find>
-				<inline-edit>
-					<inline-find><![CDATA[					'U_COPPA_NO'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register&amp;coppa=0']]></inline-find>
-					<inline-action type="after-add"><![CDATA[ . $add_reg_type]]></inline-action>
-				</inline-edit>
 			</edit>
 			<edit>
-				<find><![CDATA[					'U_COPPA_YES'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register&amp;coppa=1' . $add_lang),]]></find>
-				<inline-edit>
-					<inline-find><![CDATA[					'U_COPPA_YES'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register&amp;coppa=1']]></inline-find>
-					<inline-action type="after-add"><![CDATA[ . $add_reg_type]]></inline-action>
-				</inline-edit>
+				<find><![CDATA[					'U_COPPA_NO'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register&amp;coppa=0' . $add_lang),
+]]></find>
+				<action type="replace-with"><![CDATA[					'U_COPPA_NO'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register&amp;coppa=0' . $add_reg_type . $add_lang),
+]]></action>
 			</edit>
 			<edit>
-				<find><![CDATA[					'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register' . $add_lang),]]></find>
-				<inline-edit>
-					<inline-find><![CDATA[					'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register']]></inline-find>
-					<inline-action type="after-add"><![CDATA[ . $add_reg_type]]></inline-action>
-				</inline-edit>
+				<find><![CDATA[					'U_COPPA_YES'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register&amp;coppa=1' . $add_lang),
+]]></find>
+				<action type="replace-with"><![CDATA[					'U_COPPA_YES'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register&amp;coppa=1' . $add_reg_type . $add_lang),]]></action>
 			</edit>
 			<edit>
-				<find><![CDATA[					'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register' . $add_lang . $add_coppa),]]></find>
-				<inline-edit>
-					<inline-find><![CDATA[					'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register']]></inline-find>
-					<inline-action type="after-add"><![CDATA[ . $add_reg_type]]></inline-action>
-				</inline-edit>
+				<find><![CDATA[					'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register' . $add_lang),
+]]></find>
+				<action type="replace-with"><![CDATA[					'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register'. $add_reg_type . $add_lang),]]></action>
 			</edit>
 			<edit>
-				<find><![CDATA[			'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register'),]]></find>
-				<inline-edit>
-					<inline-find><![CDATA[			'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register']]></inline-find>
-					<inline-action type="after-add"><![CDATA[ . $add_reg_type]]></inline-action>
-				</inline-edit>
+				<find><![CDATA[					'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register' . $add_lang . $add_coppa),
+]]></find>
+				<action type="replace-with"><![CDATA[					'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register'. $add_reg_type . $add_lang . $add_coppa),]]></action>
+			</edit>
+			<edit>
+				<find><![CDATA[			'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register'),
+]]></find>
+				<action type="replace-with"><![CDATA[			'S_UCP_ACTION'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register' . $add_reg_type),]]></action>
 			</edit>
 		</open>
-		
-		
-		<open src="styles/prosilver/theme/stylesheet.css">
-			<edit>
-				<find><![CDATA[@import url("colours.css");]]></find>
-				<action type="after-add"><![CDATA[@import url("oauthorize.css");]]></action>
-			</edit>
-		</open>
-			
 		<open src="styles/prosilver/template/overall_header.html">
 			<edit>
 				<find><![CDATA[				<li class="icon-faq"><a href="{U_FAQ}" title="{L_FAQ_EXPLAIN}">{L_FAQ}</a></li>]]></find>
@@ -192,8 +159,7 @@ INSERT INTO `phpbb_config` (`config_name`, `config_value`) VALUES ('oauthorize_f
 		<open src="styles/prosilver/template/ucp_register.html">
 			<edit>
 				<find><![CDATA[<!-- INCLUDE overall_footer.html -->]]></find>
-				<action type="before-add"><![CDATA[
-<!-- //PU phpBB OAuth start -->
+				<action type="before-add"><![CDATA[<!-- //PU phpBB OAuth start -->
 <script type="text/javascript">
 <!-- IF S_OAUTH_REGISTRATION -->
 document.getElementById('username').value="<!-- IF L_OAUTH_USERNAME -->{L_OAUTH_USERNAME}<!-- ENDIF -->";
@@ -211,8 +177,13 @@ for (var i=0,len=providers.length; i<len; i++) {
 				]]></action>
 			</edit>
 		</open>
-		<diy-instructions lang="en"><![CDATA[
-Very important: Please do not install if you haven't even read about how phpBB mods are.
+		<open src="styles/prosilver/theme/stylesheet.css">
+			<edit>
+				<find><![CDATA[@import url("colours.css");]]></find>
+				<action type="after-add"><![CDATA[@import url("oauthorize.css");]]></action>
+			</edit>
+		</open>
+		<diy-instructions lang="en"><![CDATA[Very important: Please do not install if you haven't even read about how phpBB mods are.
 OAuth-based plugins are reliant on the url you use so you can't test this on a localhost. A Facebook app that ties with such a mod like this requires you to indicate on which url the Facebook app will communicate.
 
 1. Important: Run the sql that came with the instructions.
@@ -258,8 +229,6 @@ Roadmap:
 If you need help, try the phpBB forum or go to the facebook page that is indicated in this file.
 
 Visit the Facebook Page: https://www.facebook.com/pages/OAuthorize-phpBB/427850493937416
-Github: 
-
-]]></diy-instructions>
+Github:]]></diy-instructions>
 	</action-group>
 </mod>
