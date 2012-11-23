@@ -95,9 +95,11 @@ INSERT INTO `phpbb_config` (`config_name`, `config_value`) VALUES ('oauthorize_f
 		<open src="includes/ucp/ucp_register.php">
 			<edit>
 				<find><![CDATA[		global $config, $db, $user, $auth, $template, $phpbb_root_path, $phpEx;]]></find>
-				<action type="after-add"><![CDATA[//PU phpBB OAuth start
+				<action type="after-add"><![CDATA[
+//PU phpBB OAuth start
  
 		$reg_type = request_var('type', '');
+		$reg_provider = request_var('provider', '');
 		$add_reg_type ='';
 
 		if ($reg_type == 'oauth')
@@ -108,6 +110,7 @@ INSERT INTO `phpbb_config` (`config_name`, `config_value`) VALUES ('oauthorize_f
 
 			$template->assign_vars(array(
 
+				'S_OAUTH_REGISTRATION'      => true,				
 				'L_OAUTH_PROVIDER'          => $session_oauth['provider'],				
 				'L_OAUTH_ID'                => $session_oauth['id'],				
 				'L_OAUTH_USERNAME'          => $session_oauth['username'],
@@ -120,6 +123,21 @@ INSERT INTO `phpbb_config` (`config_name`, `config_value`) VALUES ('oauthorize_f
 //PU phpBB OAuth end
 ]]></action>
 			</edit>
+			<edit>
+				<find><![CDATA[				$message = $message . '<br /><br />' . sprintf($user->lang['RETURN_INDEX'], '<a href="' . append_sid("{$phpbb_root_path}index.$phpEx") . '">', '</a>');]]></find>
+				<action type="after-add"><![CDATA[
+//PU phpBB OAuth start
+			//autologin after sucessful registration assisted by oauth
+			if (isset($reg_type) && 'oauth' === $reg_type && isset($reg_provider)) 
+				meta_refresh( 3, $phpbb_root_path.'oauthorize.php?provider='.$reg_provider.'&action=login&after=registration');			
+//PU phpBB OAuth end
+]]></action>
+			</edit>			
+			
+			
+		
+			
+			
 			<edit>
 				<find><![CDATA[					'U_COPPA_NO'		=> append_sid("{$phpbb_root_path}ucp.$phpEx", 'mode=register&amp;coppa=0' . $add_lang),]]></find>
 				<inline-edit>
