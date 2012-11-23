@@ -53,6 +53,8 @@ INSERT INTO `phpbb_config` (`config_name`, `config_value`) VALUES ('oauthorize_f
 	$s_last_visit = ($user->data['user_id'] != ANONYMOUS) ? $user->format_date($user->data['session_last_visit']) : '';]]></find>
 				<action type="before-add"><![CDATA[
 	//PU phpBB OAuth start
+	$pu_oauthorize_phpbb_enabled = true; //will be used in the future for enabling/disabling this mod
+
 	if ($user->data['user_id'] != ANONYMOUS)
 	{	
 		if ($user->data['session_oauth'] != '') // oauthed
@@ -70,7 +72,7 @@ INSERT INTO `phpbb_config` (`config_name`, `config_value`) VALUES ('oauthorize_f
 	else
 	{
 		$u_oauth_facebook_connect = append_sid("{$phpbb_root_path}oauthorize.$phpEx", 'provider=facebook');
-		$l_oauth_facebook_connect = 'Facebook Connect';
+		$l_oauth_facebook_connect = 'FB Connect/Register';
 	}
 	//PU phpBB OAuth end
 				]]></action>
