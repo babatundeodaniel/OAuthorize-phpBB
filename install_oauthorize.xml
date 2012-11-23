@@ -29,6 +29,7 @@
 	</header>
 	<action-group>
 		<sql><![CDATA[ALTER TABLE `phpbb_sessions` ADD `session_oauth` VARCHAR(255) NOT NULL DEFAULT '';
+INSERT INTO `phpbb_config` (`config_name`, `config_value`) VALUES ('oauthorize_phpbb_enabled', '1');
 INSERT INTO `phpbb_config` (`config_name`, `config_value`) VALUES ('oauthorize_facebook_app_id', '344617158898614');
 INSERT INTO `phpbb_config` (`config_name`, `config_value`) VALUES ('oauthorize_facebook_app_secret', '6dc8ac871858b34798bc2488200e503d');
 INSERT INTO `phpbb_config` (`config_name`, `config_value`) VALUES ('oauthorize_facebook_app_scope', 'email');]]></sql>
