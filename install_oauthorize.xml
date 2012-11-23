@@ -192,11 +192,14 @@ INSERT INTO `phpbb_config` (`config_name`, `config_value`) VALUES ('oauthorize_f
 		<open src="styles/prosilver/template/ucp_register.html">
 			<edit>
 				<find><![CDATA[<!-- INCLUDE overall_footer.html -->]]></find>
-				<action type="before-add"><![CDATA[<!-- //PU phpBB OAuth start -->
+				<action type="before-add"><![CDATA[
+<!-- //PU phpBB OAuth start -->
 <script type="text/javascript">
+<!-- IF S_OAUTH_REGISTRATION -->
 document.getElementById('username').value="<!-- IF L_OAUTH_USERNAME -->{L_OAUTH_USERNAME}<!-- ENDIF -->";
 document.getElementById('email').value="<!-- IF L_OAUTH_EMAIL -->{L_OAUTH_EMAIL}<!-- ENDIF -->";
 document.getElementById('{L_OAUTH_ID_FORM_INPUT_KEY}').value="<!-- IF L_OAUTH_ID -->{L_OAUTH_ID}<!-- ENDIF -->";
+<!-- ENDIF -->
 
 //hide
 var providers = ['facebook'];//put your active array of providers
