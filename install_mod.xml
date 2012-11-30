@@ -20,7 +20,7 @@
 				<email><![CDATA[dev+phpbb@paoloumali.com]]></email>
 			</author>
 		</author-group>
-		<mod-version>0.1.1</mod-version>
+		<mod-version>0.1.2</mod-version>
 		<installation>
 			<level>easy</level>
 			<time>120</time>
@@ -186,10 +186,9 @@ for (var i=0,len=providers.length; i<len; i++) {
 		<diy-instructions lang="en"><![CDATA[Very important: Please do not install if you haven't even read about how phpBB mods are.
 OAuth-based plugins are reliant on the url you use so you can't test this on a localhost. A Facebook app that ties with such a mod like this requires you to indicate on which url the Facebook app will communicate.
 
-1. Important: Run the sql that came with the instructions.
-2. We currently have Facebook support. So create a facebook app, you need the following: App ID and App secret.
-3. No ACP module at the moment, so after installation and running sql, just go to the forum/oauthorize.php file and look at the top portion where you can place these values.
-4. Create a Custom Profile Field. Follow cautiously.
+1. We currently have Facebook support. So create a Facebook app, you need the following: App ID and App secret.
+2. No ACP module at the moment, so after installation and running sql, just go to the forum/oauthorize.php file and look at the top portion where you can place these values.
+3. Create a Custom Profile Field. Follow cautiously.
 
 Edit profile field
 Field type: Single text field

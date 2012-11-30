@@ -1,10 +1,6 @@
 <?php
 
 /*	
-*released 06/2011
-*Mod Name: PU phpBBFb Login and Registration (http://phpbb.paoloumali.com/viewtopic.php?f=2&t=3)
-*phpBB Modding (http://phpbb.paoloumali.com)
-*phpBBFb Login by Paolo Umali (dev@paoloumali.com)
 */
 if (!defined('IN_PHPBB'))
 {
